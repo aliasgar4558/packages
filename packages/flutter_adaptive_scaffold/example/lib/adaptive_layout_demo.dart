@@ -153,6 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
             inAnimation: AdaptiveScaffold.leftOutIn,
             key: const Key('Primary Navigation Medium'),
             builder: (_) => AdaptiveScaffold.standardNavigationRail(
+              context: context,
               selectedIndex: selectedNavigation,
               onDestinationSelected: (int newIndex) {
                 setState(() => selectedNavigation = newIndex);
@@ -167,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
             key: const Key('Primary Navigation Large'),
             inAnimation: AdaptiveScaffold.leftOutIn,
             builder: (_) => AdaptiveScaffold.standardNavigationRail(
+              context: context,
               selectedIndex: selectedNavigation,
               onDestinationSelected: (int newIndex) {
                 setState(() => selectedNavigation = newIndex);

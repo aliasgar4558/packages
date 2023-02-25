@@ -16,7 +16,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MyHomePage());
+    return MaterialApp(
+      theme: ThemeData.light().copyWith(
+        navigationRailTheme: const NavigationRailThemeData(
+          selectedIconTheme: IconThemeData(
+            color: Colors.red,
+            size: 32,
+          ),
+          selectedLabelTextStyle: TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+          ),
+          unselectedLabelTextStyle: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ),
+      home: const MyHomePage(),
+    );
   }
 }
 
@@ -42,19 +60,13 @@ class _MyHomePageState extends State<MyHomePage> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            color: const Color.fromARGB(255, 255, 29, 197),
+            color: Colors.grey,
             height: 400,
           ),
         )
     ];
 
     return AdaptiveScaffold(
-      // An option to override the default breakpoints used for small, medium,
-      // and large.
-      smallBreakpoint: const WidthPlatformBreakpoint(end: 700),
-      mediumBreakpoint: const WidthPlatformBreakpoint(begin: 700, end: 1000),
-      largeBreakpoint: const WidthPlatformBreakpoint(begin: 1000),
-      useDrawer: false,
       selectedIndex: _selectedTab,
       onSelectedIndexChange: (int index) {
         setState(() => _selectedTab = index);
@@ -93,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       // Define a default secondaryBody.
       secondaryBody: (_) => Container(
-        color: const Color.fromARGB(255, 234, 158, 192),
+        color: Colors.pink[200],
       ),
       // Override the default secondaryBody during the smallBreakpoint to be
       // empty. Must use AdaptiveScaffold.emptyBuilder to ensure it is properly
@@ -101,5 +113,5 @@ class _MyHomePageState extends State<MyHomePage> {
       smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
     );
   }
-// #enddocregion
+  // #enddocregion
 }

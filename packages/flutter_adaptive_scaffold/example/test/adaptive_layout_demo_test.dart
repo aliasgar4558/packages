@@ -55,8 +55,8 @@ void main() {
     final WidgetBuilder? widgetBuilder = slotLayoutConfig.builder;
     final Widget Function(BuildContext) widgetFunction =
         (widgetBuilder ?? () => Container()) as Widget Function(BuildContext);
-    final Builder? bottomNavBarBuilder = widgetFunction(context) as Builder?;
-    expect(bottomNavBarBuilder, isNotNull);
+    final Builder builderWidget = widgetFunction(context) as Builder;
+    expect(builderWidget, isNotNull);
   });
 
   testWidgets(
