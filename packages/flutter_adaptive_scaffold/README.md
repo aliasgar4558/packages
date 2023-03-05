@@ -57,28 +57,23 @@ animation should use AdaptiveLayout.
       destinations: const <NavigationDestination>[
         NavigationDestination(
           icon: Icon(Icons.inbox_outlined),
-          selectedIcon: Icon(Icons.inbox),
+          selectedIcon: Icon(Icons.inbox, size: 28),
           label: 'Inbox',
         ),
         NavigationDestination(
           icon: Icon(Icons.article_outlined),
-          selectedIcon: Icon(Icons.article),
+          selectedIcon: Icon(Icons.article, size: 28),
           label: 'Articles',
         ),
         NavigationDestination(
           icon: Icon(Icons.chat_outlined),
-          selectedIcon: Icon(Icons.chat),
+          selectedIcon: Icon(Icons.chat, size: 28),
           label: 'Chat',
         ),
         NavigationDestination(
           icon: Icon(Icons.video_call_outlined),
-          selectedIcon: Icon(Icons.video_call),
+          selectedIcon: Icon(Icons.video_call, size: 28),
           label: 'Video',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Inbox',
         ),
       ],
       body: (_) => GridView.count(crossAxisCount: 2, children: children),

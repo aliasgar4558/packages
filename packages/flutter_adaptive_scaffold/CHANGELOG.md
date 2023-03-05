@@ -1,13 +1,13 @@
-## 0.1.2
+## 0.1.3
 
 * 🐛 : FIX - Navigation Rail items not considering `NavigationRailTheme` values - [121135](https://github.com/flutter/flutter/issues/121135)
 * When `NavigationRailTheme` is provided, it shall that consider that if user has not given theme related data explicitly.
 
-## 0.1.1
+## 0.1.2
 
 * 🐛 : FIX - [**121135**](https://github.com/flutter/flutter/issues/121135) : `selectedIcon` parameter not displayed even if it is provided from example.
 
-## NEXT
+## 0.1.1
 
 * Aligns Dart and Flutter SDK constraints.
 
