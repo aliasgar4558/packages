@@ -1,5 +1,20 @@
 ## NEXT
 
+* Updates minimum supported SDK version to Flutter 3.29/Dart 3.7.
+
+## 2.4.2
+
+* Updates to Pigeon 25.5.0.
+* Updates minimum supported SDK version to Flutter 3.27/Dart 3.6.
+
+## 2.4.1
+
+* Updates to Pigeon v22.
+* Updates minimum supported SDK version to Flutter 3.19/Dart 3.3.
+
+## 2.4.0
+
+* Adds Swift Package Manager compatibility.
 * Updates minimum iOS version to 12.0 and minimum Flutter version to 3.16.6.
 
 ## 2.3.2

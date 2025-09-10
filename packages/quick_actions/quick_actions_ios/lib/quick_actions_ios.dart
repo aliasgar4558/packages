@@ -14,9 +14,8 @@ late QuickActionHandler _handler;
 /// An implementation of [QuickActionsPlatform] for iOS.
 class QuickActionsIos extends QuickActionsPlatform {
   /// Creates a new plugin implementation instance.
-  QuickActionsIos({
-    @visibleForTesting IOSQuickActionsApi? api,
-  }) : _hostApi = api ?? IOSQuickActionsApi();
+  QuickActionsIos({@visibleForTesting IOSQuickActionsApi? api})
+    : _hostApi = api ?? IOSQuickActionsApi();
 
   final IOSQuickActionsApi _hostApi;
 
@@ -29,7 +28,7 @@ class QuickActionsIos extends QuickActionsPlatform {
   Future<void> initialize(QuickActionHandler handler) async {
     final _QuickActionHandlerApi quickActionsHandlerApi =
         _QuickActionHandlerApi();
-    IOSQuickActionsFlutterApi.setup(quickActionsHandlerApi);
+    IOSQuickActionsFlutterApi.setUp(quickActionsHandlerApi);
     _handler = handler;
   }
 
@@ -47,6 +46,7 @@ class QuickActionsIos extends QuickActionsPlatform {
     return ShortcutItemMessage(
       type: item.type,
       localizedTitle: item.localizedTitle,
+      localizedSubtitle: item.localizedSubtitle,
       icon: item.icon,
     );
   }

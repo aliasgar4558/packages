@@ -114,12 +114,15 @@ abstract class CameraPlatform extends PlatformInterface {
   /// - Should support all 4 orientations.
   Stream<DeviceOrientationChangedEvent> onDeviceOrientationChanged() {
     throw UnimplementedError(
-        'onDeviceOrientationChanged() is not implemented.');
+      'onDeviceOrientationChanged() is not implemented.',
+    );
   }
 
   /// Locks the capture orientation.
   Future<void> lockCaptureOrientation(
-      int cameraId, DeviceOrientation orientation) {
+    int cameraId,
+    DeviceOrientation orientation,
+  ) {
     throw UnimplementedError('lockCaptureOrientation() is not implemented.');
   }
 
@@ -140,14 +143,14 @@ abstract class CameraPlatform extends PlatformInterface {
 
   /// Starts a video recording.
   ///
-  /// The length of the recording can be limited by specifying the [maxVideoDuration].
-  /// By default no maximum duration is specified,
-  /// meaning the recording will continue until manually stopped.
-  /// With [maxVideoDuration] set the video is returned in a [VideoRecordedEvent]
-  /// through the [onVideoRecordedEvent] stream when the set duration is reached.
-  ///
   /// This method is deprecated in favour of [startVideoCapturing].
-  Future<void> startVideoRecording(int cameraId, {Duration? maxVideoDuration}) {
+  Future<void> startVideoRecording(
+    int cameraId, {
+    @Deprecated(
+      'This parameter is unused, and will be ignored on all platforms',
+    )
+    Duration? maxVideoDuration,
+  }) {
     throw UnimplementedError('startVideoRecording() is not implemented.');
   }
 
@@ -156,8 +159,7 @@ abstract class CameraPlatform extends PlatformInterface {
   /// Please see [VideoCaptureOptions] for documentation on the
   /// configuration options.
   Future<void> startVideoCapturing(VideoCaptureOptions options) {
-    return startVideoRecording(options.cameraId,
-        maxVideoDuration: options.maxDuration);
+    return startVideoRecording(options.cameraId);
   }
 
   /// Stops the video recording and returns the file where it was saved.
@@ -175,6 +177,9 @@ abstract class CameraPlatform extends PlatformInterface {
     throw UnimplementedError('resumeVideoRecording() is not implemented.');
   }
 
+  /// Check whether this platform supports image streaming via [onStreamedFrameAvailable].
+  bool supportsImageStreaming() => false;
+
   /// A new streamed frame is available.
   ///
   /// Listening to this stream will start streaming, and canceling will stop.
@@ -185,8 +190,10 @@ abstract class CameraPlatform extends PlatformInterface {
   ///
   // TODO(bmparr): Add options to control streaming settings (e.g.,
   // resolution and FPS).
-  Stream<CameraImageData> onStreamedFrameAvailable(int cameraId,
-      {CameraImageStreamOptions? options}) {
+  Stream<CameraImageData> onStreamedFrameAvailable(
+    int cameraId, {
+    CameraImageStreamOptions? options,
+  }) {
     throw UnimplementedError('onStreamedFrameAvailable() is not implemented.');
   }
 
@@ -287,7 +294,8 @@ abstract class CameraPlatform extends PlatformInterface {
   /// Sets the active camera while recording.
   Future<void> setDescriptionWhileRecording(CameraDescription description) {
     throw UnimplementedError(
-        'setDescriptionWhileRecording() is not implemented.');
+      'setDescriptionWhileRecording() is not implemented.',
+    );
   }
 
   /// Returns a widget showing a live camera preview.

@@ -58,10 +58,14 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
     double? maxHeight,
     int? imageQuality,
     bool requestFullMetadata = true,
+    int? limit,
   }) {
     if (imageQuality != null && (imageQuality < 0 || imageQuality > 100)) {
       throw ArgumentError.value(
-          imageQuality, 'imageQuality', 'must be between 0 and 100');
+        imageQuality,
+        'imageQuality',
+        'must be between 0 and 100',
+      );
     }
 
     if (maxWidth != null && maxWidth < 0) {
@@ -72,15 +76,14 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
       throw ArgumentError.value(maxHeight, 'maxHeight', 'cannot be negative');
     }
 
-    return _channel.invokeMethod<List<dynamic>?>(
-      'pickMultiImage',
-      <String, dynamic>{
-        'maxWidth': maxWidth,
-        'maxHeight': maxHeight,
-        'imageQuality': imageQuality,
-        'requestFullMetadata': requestFullMetadata,
-      },
-    );
+    return _channel
+        .invokeMethod<List<dynamic>?>('pickMultiImage', <String, dynamic>{
+          'maxWidth': maxWidth,
+          'maxHeight': maxHeight,
+          'imageQuality': imageQuality,
+          'requestFullMetadata': requestFullMetadata,
+          'limit': limit,
+        });
   }
 
   Future<String?> _getImagePath({
@@ -93,7 +96,10 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
   }) {
     if (imageQuality != null && (imageQuality < 0 || imageQuality > 100)) {
       throw ArgumentError.value(
-          imageQuality, 'imageQuality', 'must be between 0 and 100');
+        imageQuality,
+        'imageQuality',
+        'must be between 0 and 100',
+      );
     }
 
     if (maxWidth != null && maxWidth < 0) {
@@ -104,17 +110,14 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
       throw ArgumentError.value(maxHeight, 'maxHeight', 'cannot be negative');
     }
 
-    return _channel.invokeMethod<String>(
-      'pickImage',
-      <String, dynamic>{
-        'source': source.index,
-        'maxWidth': maxWidth,
-        'maxHeight': maxHeight,
-        'imageQuality': imageQuality,
-        'cameraDevice': preferredCameraDevice.index,
-        'requestFullMetadata': requestFullMetadata,
-      },
-    );
+    return _channel.invokeMethod<String>('pickImage', <String, dynamic>{
+      'source': source.index,
+      'maxWidth': maxWidth,
+      'maxHeight': maxHeight,
+      'imageQuality': imageQuality,
+      'cameraDevice': preferredCameraDevice.index,
+      'requestFullMetadata': requestFullMetadata,
+    });
   }
 
   @override
@@ -136,20 +139,17 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
     CameraDevice preferredCameraDevice = CameraDevice.rear,
     Duration? maxDuration,
   }) {
-    return _channel.invokeMethod<String>(
-      'pickVideo',
-      <String, dynamic>{
-        'source': source.index,
-        'maxDuration': maxDuration?.inSeconds,
-        'cameraDevice': preferredCameraDevice.index
-      },
-    );
+    return _channel.invokeMethod<String>('pickVideo', <String, dynamic>{
+      'source': source.index,
+      'maxDuration': maxDuration?.inSeconds,
+      'cameraDevice': preferredCameraDevice.index,
+    });
   }
 
   @override
   Future<LostData> retrieveLostData() async {
-    final Map<String, dynamic>? result =
-        await _channel.invokeMapMethod<String, dynamic>('retrieve');
+    final Map<String, dynamic>? result = await _channel
+        .invokeMapMethod<String, dynamic>('retrieve');
 
     if (result == null) {
       return LostData.empty();
@@ -170,8 +170,9 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
     PlatformException? exception;
     if (result.containsKey('errorCode')) {
       exception = PlatformException(
-          code: result['errorCode']! as String,
-          message: result['errorMessage'] as String?);
+        code: result['errorCode']! as String,
+        message: result['errorMessage'] as String?,
+      );
     }
 
     final String? path = result['path'] as String?;
@@ -244,6 +245,7 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
       maxHeight: options.imageOptions.maxHeight,
       imageQuality: options.imageOptions.imageQuality,
       requestFullMetadata: options.imageOptions.requestFullMetadata,
+      limit: options.limit,
     );
     if (paths == null) {
       return <XFile>[];
@@ -253,9 +255,7 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
   }
 
   @override
-  Future<List<XFile>> getMedia({
-    required MediaOptions options,
-  }) async {
+  Future<List<XFile>> getMedia({required MediaOptions options}) async {
     final ImageOptions imageOptions = options.imageOptions;
 
     final Map<String, dynamic> args = <String, dynamic>{
@@ -263,15 +263,15 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
       'maxImageHeight': imageOptions.maxHeight,
       'imageQuality': imageOptions.imageQuality,
       'allowMultiple': options.allowMultiple,
+      'limit': options.limit,
     };
 
     final List<XFile>? paths = await _channel
-        .invokeMethod<List<dynamic>?>(
-          'pickMedia',
-          args,
-        )
-        .then((List<dynamic>? paths) =>
-            paths?.map((dynamic path) => XFile(path as String)).toList());
+        .invokeMethod<List<dynamic>?>('pickMedia', args)
+        .then(
+          (List<dynamic>? paths) =>
+              paths?.map((dynamic path) => XFile(path as String)).toList(),
+        );
 
     return paths ?? <XFile>[];
   }
@@ -294,8 +294,8 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
   Future<LostDataResponse> getLostData() async {
     List<XFile>? pickedFileList;
 
-    final Map<String, dynamic>? result =
-        await _channel.invokeMapMethod<String, dynamic>('retrieve');
+    final Map<String, dynamic>? result = await _channel
+        .invokeMapMethod<String, dynamic>('retrieve');
 
     if (result == null) {
       return LostDataResponse.empty();
@@ -304,9 +304,7 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
     assert(result.containsKey('path') != result.containsKey('errorCode'));
 
     final String? type = result['type'] as String?;
-    assert(
-      type == kTypeImage || type == kTypeVideo || type == kTypeMedia,
-    );
+    assert(type == kTypeImage || type == kTypeVideo || type == kTypeMedia);
 
     RetrieveType? retrieveType;
     switch (type) {
@@ -321,8 +319,9 @@ class MethodChannelImagePicker extends ImagePickerPlatform {
     PlatformException? exception;
     if (result.containsKey('errorCode')) {
       exception = PlatformException(
-          code: result['errorCode']! as String,
-          message: result['errorMessage'] as String?);
+        code: result['errorCode']! as String,
+        message: result['errorMessage'] as String?,
+      );
     }
 
     final String? path = result['path'] as String?;

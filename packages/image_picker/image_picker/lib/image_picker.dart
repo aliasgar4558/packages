@@ -79,12 +79,12 @@ class ImagePicker {
   }) {
     final ImagePickerOptions imagePickerOptions =
         ImagePickerOptions.createAndValidate(
-      maxWidth: maxWidth,
-      maxHeight: maxHeight,
-      imageQuality: imageQuality,
-      preferredCameraDevice: preferredCameraDevice,
-      requestFullMetadata: requestFullMetadata,
-    );
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+          imageQuality: imageQuality,
+          preferredCameraDevice: preferredCameraDevice,
+          requestFullMetadata: requestFullMetadata,
+        );
 
     return platform.getImageFromSource(
       source: source,
@@ -112,6 +112,9 @@ class ImagePicker {
   /// image types such as JPEG and on Android PNG and WebP, too. If compression is not
   /// supported for the image that is picked, a warning message will be logged.
   ///
+  /// The `limit` parameter modifies the maximum number of images that can be selected.
+  /// This value may be ignored by platforms that cannot support it.
+  ///
   /// Use `requestFullMetadata` (defaults to `true`) to control how much additional
   /// information the plugin tries to get.
   /// If `requestFullMetadata` is set to `true`, the plugin tries to get the full
@@ -128,6 +131,7 @@ class ImagePicker {
     double? maxWidth,
     double? maxHeight,
     int? imageQuality,
+    int? limit,
     bool requestFullMetadata = true,
   }) {
     final ImageOptions imageOptions = ImageOptions.createAndValidate(
@@ -138,8 +142,9 @@ class ImagePicker {
     );
 
     return platform.getMultiImageWithOptions(
-      options: MultiImagePickerOptions(
+      options: MultiImagePickerOptions.createAndValidate(
         imageOptions: imageOptions,
+        limit: limit,
       ),
     );
   }
@@ -186,7 +191,7 @@ class ImagePicker {
     bool requestFullMetadata = true,
   }) async {
     final List<XFile> listMedia = await platform.getMedia(
-      options: MediaOptions(
+      options: MediaOptions.createAndValidate(
         imageOptions: ImageOptions.createAndValidate(
           maxHeight: maxHeight,
           maxWidth: maxWidth,
@@ -223,6 +228,9 @@ class ImagePicker {
   /// image types such as JPEG and on Android PNG and WebP, too. If compression is not
   /// supported for the image that is picked, a warning message will be logged.
   ///
+  /// The `limit` parameter modifies the maximum number of media that can be selected.
+  /// This value may be ignored by platforms that cannot support it.
+  ///
   /// Use `requestFullMetadata` (defaults to `true`) to control how much additional
   /// information the plugin tries to get.
   /// If `requestFullMetadata` is set to `true`, the plugin tries to get the full
@@ -239,10 +247,11 @@ class ImagePicker {
     double? maxWidth,
     double? maxHeight,
     int? imageQuality,
+    int? limit,
     bool requestFullMetadata = true,
   }) {
     return platform.getMedia(
-      options: MediaOptions(
+      options: MediaOptions.createAndValidate(
         allowMultiple: true,
         imageOptions: ImageOptions.createAndValidate(
           maxHeight: maxHeight,
@@ -250,6 +259,7 @@ class ImagePicker {
           imageQuality: imageQuality,
           requestFullMetadata: requestFullMetadata,
         ),
+        limit: limit,
       ),
     );
   }
@@ -285,6 +295,28 @@ class ImagePicker {
       source: source,
       preferredCameraDevice: preferredCameraDevice,
       maxDuration: maxDuration,
+    );
+  }
+
+  /// Returns a [List<XFile>] of the videos that were picked.
+  ///
+  /// The returned [List<XFile>] is intended to be used within a single app
+  /// session. Do not save the file path and use it across sessions.
+  ///
+  /// The videos come from the gallery.
+  ///
+  /// The [maxDuration] argument specifies the maximum duration of the captured
+  /// videos. If no [maxDuration] is specified, the maximum duration will be
+  /// infinite. This value may be ignored by platforms that cannot support it.
+  ///
+  /// The `limit` parameter modifies the maximum number of videos that can be
+  /// selected. This value may be ignored by platforms that cannot support it.
+  ///
+  /// The method can throw a [PlatformException] if the video selection process
+  /// fails.
+  Future<List<XFile>> pickMultiVideo({Duration? maxDuration, int? limit}) {
+    return platform.getMultiVideoWithOptions(
+      options: MultiVideoPickerOptions(maxDuration: maxDuration, limit: limit),
     );
   }
 

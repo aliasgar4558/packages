@@ -9,5 +9,8 @@
 # NOTE: camera_android is semi-excluded via special casing in the repo tools.
 # See create_all_packages_app_command.dart.
 
-# This is a permament entry, as it should never be a direct app dependency.
+# This is a permanent entry, as it should never be a direct app dependency.
 - plugin_platform_interface
+# Temporarily excluded since it hasn't been updated for the major version
+# change in google_sign_in. https://github.com/flutter/flutter/issues/171048
+- extension_google_sign_in_as_googleapis_auth

@@ -6,7 +6,8 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'messages.g.dart' as messages;
 
 messages.StorageDirectory _convertStorageDirectory(
-    StorageDirectory? directory) {
+  StorageDirectory? directory,
+) {
   switch (directory) {
     case null:
       return messages.StorageDirectory.root;
@@ -74,7 +75,7 @@ class PathProviderAndroid extends PathProviderPlatform {
 
   @override
   Future<List<String>?> getExternalCachePaths() async {
-    return (await _api.getExternalCachePaths()).cast<String>();
+    return _api.getExternalCachePaths();
   }
 
   @override
@@ -86,15 +87,15 @@ class PathProviderAndroid extends PathProviderPlatform {
 
   @override
   Future<String?> getDownloadsPath() async {
-    final List<String> paths =
-        await _getExternalStoragePaths(type: StorageDirectory.downloads);
+    final List<String> paths = await _getExternalStoragePaths(
+      type: StorageDirectory.downloads,
+    );
     return paths.isEmpty ? null : paths.first;
   }
 
   Future<List<String>> _getExternalStoragePaths({
     StorageDirectory? type,
   }) async {
-    return (await _api.getExternalStoragePaths(_convertStorageDirectory(type)))
-        .cast<String>();
+    return _api.getExternalStoragePaths(_convertStorageDirectory(type));
   }
 }

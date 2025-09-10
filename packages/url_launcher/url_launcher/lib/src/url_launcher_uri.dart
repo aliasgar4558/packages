@@ -40,19 +40,24 @@ Future<bool> launchUrl(
   Uri url, {
   LaunchMode mode = LaunchMode.platformDefault,
   WebViewConfiguration webViewConfiguration = const WebViewConfiguration(),
+  BrowserConfiguration browserConfiguration = const BrowserConfiguration(),
   String? webOnlyWindowName,
 }) async {
   if ((mode == LaunchMode.inAppWebView ||
           mode == LaunchMode.inAppBrowserView) &&
       !(url.scheme == 'https' || url.scheme == 'http')) {
-    throw ArgumentError.value(url, 'url',
-        'To use an in-app web view, you must provide an http(s) URL.');
+    throw ArgumentError.value(
+      url,
+      'url',
+      'To use an in-app web view, you must provide an http(s) URL.',
+    );
   }
   return UrlLauncherPlatform.instance.launchUrl(
     url.toString(),
     LaunchOptions(
       mode: convertLaunchMode(mode),
-      webViewConfiguration: convertConfiguration(webViewConfiguration),
+      webViewConfiguration: convertWebViewConfiguration(webViewConfiguration),
+      browserConfiguration: convertBrowserConfiguration(browserConfiguration),
       webOnlyWindowName: webOnlyWindowName,
     ),
   );

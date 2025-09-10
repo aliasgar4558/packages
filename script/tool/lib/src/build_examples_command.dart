@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:yaml/yaml.dart';
 
 import 'common/core.dart';
+import 'common/file_filters.dart';
 import 'common/output_utils.dart';
 import 'common/package_looping_command.dart';
 import 'common/plugin_utils.dart';
@@ -38,6 +39,9 @@ const String _flutterBuildTypeWindows = 'windows';
 
 const String _flutterBuildTypeAndroidAlias = 'android';
 
+/// Key for Swift Package Manager.
+const String _swiftPackageManagerFlag = 'swift-package-manager';
+
 /// A command to build the example applications for packages.
 class BuildExamplesCommand extends PackageLoopingCommand {
   /// Creates an instance of the build command.
@@ -45,6 +49,7 @@ class BuildExamplesCommand extends PackageLoopingCommand {
     super.packagesDir, {
     super.processRunner,
     super.platform,
+    super.gitDir,
   }) {
     argParser.addFlag(platformLinux);
     argParser.addFlag(platformMacOS);
@@ -58,6 +63,7 @@ class BuildExamplesCommand extends PackageLoopingCommand {
       defaultsTo: '',
       help: 'Enables the given Dart SDK experiments.',
     );
+    argParser.addFlag(_swiftPackageManagerFlag, defaultsTo: null);
   }
 
   // Maps the switch this command uses to identify a platform to information
@@ -110,6 +116,23 @@ class BuildExamplesCommand extends PackageLoopingCommand {
       '"$_pluginToolsConfigBuildFlagsKey" containing a map containing a '
       'single key "$_pluginToolsConfigGlobalKey" containing a list of build '
       'arguments.';
+
+  /// Returns whether the Swift Package Manager feature should be enabled,
+  /// disabled, or left to the default value.
+  bool? get _swiftPackageManagerFeatureConfig {
+    final List<String> platformFlags = _platforms.keys.toList();
+    if (!platformFlags.contains(platformIOS) &&
+        !platformFlags.contains(platformMacOS)) {
+      return null;
+    }
+
+    return getNullableBoolArg(_swiftPackageManagerFlag);
+  }
+
+  @override
+  bool shouldIgnoreFile(String path) {
+    return isRepoLevelNonCodeImpactingFile(path) || isPackageSupportFile(path);
+  }
 
   @override
   Future<void> initializeRun() async {
@@ -166,8 +189,20 @@ class BuildExamplesCommand extends PackageLoopingCommand {
     }
     print('');
 
+    final bool? swiftPackageManagerOverride =
+        isPlugin ? _swiftPackageManagerFeatureConfig : null;
+
     bool builtSomething = false;
     for (final RepositoryPackage example in package.getExamples()) {
+      // Rather than changing global config state, enable SwiftPM via a
+      // temporary package-level override.
+      if (swiftPackageManagerOverride != null) {
+        print('Overriding enable-swift-package-manager to '
+            '$swiftPackageManagerOverride');
+        setSwiftPackageManagerState(example,
+            enabled: swiftPackageManagerOverride);
+      }
+
       final String packageName =
           getRelativePosixPath(example.directory, from: packagesDir);
 
@@ -193,6 +228,12 @@ class BuildExamplesCommand extends PackageLoopingCommand {
             extraBuildFlags: platform.extraBuildFlags)) {
           errors.add('$packageName (${platform.label})');
         }
+      }
+
+      // If an override was added, remove it.
+      if (swiftPackageManagerOverride != null) {
+        print('Removing enable-swift-package-manager override');
+        setSwiftPackageManagerState(example, enabled: null);
       }
     }
 

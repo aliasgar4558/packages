@@ -7,17 +7,16 @@ import 'process_utils.dart';
 
 Future<int> runFlutterCommand(
   String projectDirectory,
-  String command, [
-  List<String> commandArguments = const <String>[],
-]) {
-  return runProcess(
-    getFlutterCommand(),
-    <String>[
-      command,
-      ...commandArguments,
-    ],
-    workingDirectory: projectDirectory,
-  );
+  String command,
+  List<String> commandArguments, {
+  String? wrapperCommand,
+}) {
+  final String flutterCommand = getFlutterCommand();
+  return runProcess(wrapperCommand ?? flutterCommand, <String>[
+    if (wrapperCommand != null) flutterCommand,
+    command,
+    ...commandArguments,
+  ], workingDirectory: projectDirectory);
 }
 
 Future<int> runFlutterBuild(
@@ -26,15 +25,11 @@ Future<int> runFlutterBuild(
   bool debug = true,
   List<String> flags = const <String>[],
 }) {
-  return runFlutterCommand(
-    projectDirectory,
-    'build',
-    <String>[
-      target,
-      if (debug) '--debug',
-      ...flags,
-    ],
-  );
+  return runFlutterCommand(projectDirectory, 'build', <String>[
+    target,
+    if (debug) '--debug',
+    ...flags,
+  ]);
 }
 
 Future<int> runXcodeBuild(
@@ -43,27 +38,19 @@ Future<int> runXcodeBuild(
   String? destination,
   List<String> extraArguments = const <String>[],
 }) {
-  return runProcess(
-    'xcodebuild',
-    <String>[
-      '-workspace',
-      'Runner.xcworkspace',
-      '-scheme',
-      'Runner',
-      if (sdk != null) ...<String>['-sdk', sdk],
-      if (destination != null) ...<String>['-destination', destination],
-      ...extraArguments,
-    ],
-    workingDirectory: nativeProjectDirectory,
-  );
+  return runProcess('xcodebuild', <String>[
+    '-workspace',
+    'Runner.xcworkspace',
+    '-scheme',
+    'Runner',
+    if (sdk != null) ...<String>['-sdk', sdk],
+    if (destination != null) ...<String>['-destination', destination],
+    ...extraArguments,
+  ], workingDirectory: nativeProjectDirectory);
 }
 
 Future<int> runGradleBuild(String nativeProjectDirectory, [String? command]) {
-  return runProcess(
-    './gradlew',
-    <String>[
-      if (command != null) command,
-    ],
-    workingDirectory: nativeProjectDirectory,
-  );
+  return runProcess('./gradlew', <String>[
+    if (command != null) command,
+  ], workingDirectory: nativeProjectDirectory);
 }

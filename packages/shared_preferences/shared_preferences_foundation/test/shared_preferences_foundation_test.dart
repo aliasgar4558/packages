@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences_foundation/shared_preferences_foundation.dart';
+import 'package:shared_preferences_foundation/src/shared_preferences_foundation.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 import 'package:shared_preferences_platform_interface/types.dart';
 
@@ -14,19 +14,16 @@ class _MockSharedPreferencesApi implements TestUserDefaultsApi {
   final Map<String, Object> items = <String, Object>{};
 
   @override
-  Map<String?, Object?> getAll(
-    String prefix,
-    List<String?>? allowList,
-  ) {
+  Map<String, Object> getAll(String prefix, List<String?>? allowList) {
     Set<String?>? allowSet;
     if (allowList != null) {
       allowSet = Set<String>.from(allowList);
     }
-    return <String?, Object?>{
-      for (final String key in items.keys)
-        if (key.startsWith(prefix) &&
-            (allowSet == null || allowSet.contains(key)))
-          key: items[key]
+    return <String, Object>{
+      for (final MapEntry<String, Object> entry in items.entries)
+        if (entry.key.startsWith(prefix) &&
+            (allowSet == null || allowSet.contains(entry.key)))
+          entry.key: entry.value,
     };
   }
 
@@ -98,13 +95,15 @@ void main() {
 
   setUp(() {
     api = _MockSharedPreferencesApi();
-    TestUserDefaultsApi.setup(api);
+    TestUserDefaultsApi.setUp(api);
   });
 
-  test('registerWith', () {
+  test('registerWith', () async {
     SharedPreferencesFoundation.registerWith();
-    expect(SharedPreferencesStorePlatform.instance,
-        isA<SharedPreferencesFoundation>());
+    expect(
+      SharedPreferencesStorePlatform.instance,
+      isA<SharedPreferencesFoundation>(),
+    );
   });
 
   test('remove', () async {
@@ -143,22 +142,16 @@ void main() {
     }
 
     Map<String?, Object?> all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: 'prefix.'),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: 'prefix.')),
     );
     expect(all.length, 5);
     await plugin.clearWithParameters(
-      ClearParameters(
-        filter: PreferencesFilter(prefix: 'prefix.'),
-      ),
+      ClearParameters(filter: PreferencesFilter(prefix: 'prefix.')),
     );
     all = await plugin.getAll();
     expect(all.length, 5);
     all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: 'prefix.'),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: 'prefix.')),
     );
     expect(all.length, 0);
   });
@@ -170,9 +163,7 @@ void main() {
     }
 
     Map<String?, Object?> all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: 'prefix.'),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: 'prefix.')),
     );
     expect(all.length, 5);
     await plugin.clearWithParameters(
@@ -186,9 +177,7 @@ void main() {
     all = await plugin.getAll();
     expect(all.length, 5);
     all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: 'prefix.'),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: 'prefix.')),
     );
     expect(all.length, 4);
   });
@@ -219,9 +208,7 @@ void main() {
       api.items[key] = allTestValues[key]!;
     }
     final Map<String?, Object?> all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: 'prefix.'),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: 'prefix.')),
     );
     expect(all.length, 5);
     expect(all, prefixTestValues);
@@ -255,13 +242,13 @@ void main() {
     expect(await plugin.setValue('String', 'flutter.String', 'hi'), isTrue);
     expect(api.items['flutter.String'], 'hi');
     expect(
-        await plugin
-            .setValue('StringList', 'flutter.StringList', <String>['hi']),
-        isTrue);
+      await plugin.setValue('StringList', 'flutter.StringList', <String>['hi']),
+      isTrue,
+    );
     expect(api.items['flutter.StringList'], <String>['hi']);
   });
 
-  test('setValue with unsupported type', () {
+  test('setValue with unsupported type', () async {
     final SharedPreferencesFoundation plugin = SharedPreferencesFoundation();
     expect(() async {
       await plugin.setValue('Map', 'flutter.key', <String, String>{});
@@ -297,9 +284,7 @@ void main() {
       api.items[key] = allTestValues[key]!;
     }
     final Map<String?, Object?> all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: ''),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: '')),
     );
     expect(all.length, 15);
     expect(all, allTestValues);
@@ -312,20 +297,14 @@ void main() {
     }
 
     Map<String?, Object?> all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: ''),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: '')),
     );
     expect(all.length, 15);
     await plugin.clearWithParameters(
-      ClearParameters(
-        filter: PreferencesFilter(prefix: ''),
-      ),
+      ClearParameters(filter: PreferencesFilter(prefix: '')),
     );
     all = await plugin.getAllWithParameters(
-      GetAllParameters(
-        filter: PreferencesFilter(prefix: ''),
-      ),
+      GetAllParameters(filter: PreferencesFilter(prefix: '')),
     );
     expect(all.length, 0);
   });

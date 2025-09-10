@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps/google_maps.dart' as gmaps;
 import 'package:google_maps/google_maps_geometry.dart' as geometry;
+import 'package:google_maps/google_maps_visualization.dart' as visualization;
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:google_maps_flutter_web/google_maps_flutter_web.dart';
 // ignore: implementation_imports
@@ -19,14 +21,18 @@ import 'package:integration_test/integration_test.dart';
 // (For Color opacity values, for example)
 const double _acceptableDelta = 0.01;
 
+extension GMapsProps on JSObject {
+  external bool get clickable;
+}
+
 /// Test Shapes (Circle, Polygon, Polyline)
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  late gmaps.GMap map;
+  late gmaps.Map map;
 
   setUp(() {
-    map = gmaps.GMap(createDivElement());
+    map = gmaps.Map(createDivElement());
   });
 
   group('CirclesController', () {
@@ -108,10 +114,40 @@ void main() {
 
       final gmaps.Circle circle = controller.circles.values.first.circle!;
 
-      expect(circle.get('fillColor'), '#fabada');
-      expect(circle.get('fillOpacity'), closeTo(0.5, _acceptableDelta));
-      expect(circle.get('strokeColor'), '#c0ffee');
-      expect(circle.get('strokeOpacity'), closeTo(1, _acceptableDelta));
+      expect((circle.get('fillColor')! as JSString).toDart, '#fabada');
+      expect(
+        (circle.get('fillOpacity')! as JSNumber).toDartDouble,
+        closeTo(0.5, _acceptableDelta),
+      );
+      expect((circle.get('strokeColor')! as JSString).toDart, '#c0ffee');
+      expect(
+        (circle.get('strokeOpacity')! as JSNumber).toDartDouble,
+        closeTo(1, _acceptableDelta),
+      );
+    });
+
+    testWidgets('addCircles sets clickable according to consumeTapEvents', (
+      WidgetTester tester,
+    ) async {
+      final Set<Circle> circles = <Circle>{
+        const Circle(circleId: CircleId('1'), consumeTapEvents: true),
+        const Circle(circleId: CircleId('2')),
+      };
+
+      controller.addCircles(circles);
+
+      final CircleController? circle1Controller =
+          controller.circles[const CircleId('1')];
+      final CircleController? circle2Controller =
+          controller.circles[const CircleId('2')];
+
+      final bool circle1Clickable =
+          (circle1Controller!.circle! as JSObject).clickable;
+      final bool circle2Clickable =
+          (circle2Controller!.circle! as JSObject).clickable;
+
+      expect(circle1Clickable, true);
+      expect(circle2Clickable, false);
     });
   });
 
@@ -146,7 +182,9 @@ void main() {
       controller.addPolygons(polygons);
 
       expect(
-          controller.polygons[const PolygonId('1')]?.polygon?.visible, isTrue);
+        controller.polygons[const PolygonId('1')]?.polygon?.visible,
+        isTrue,
+      );
 
       // Update the polygon
       final Set<Polygon> updatedPolygons = <Polygon>{
@@ -156,7 +194,9 @@ void main() {
 
       expect(controller.polygons.length, 1);
       expect(
-          controller.polygons[const PolygonId('1')]?.polygon?.visible, isFalse);
+        controller.polygons[const PolygonId('1')]?.polygon?.visible,
+        isFalse,
+      );
     });
 
     testWidgets('removePolygons', (WidgetTester tester) async {
@@ -197,10 +237,16 @@ void main() {
 
       final gmaps.Polygon polygon = controller.polygons.values.first.polygon!;
 
-      expect(polygon.get('fillColor'), '#fabada');
-      expect(polygon.get('fillOpacity'), closeTo(0.5, _acceptableDelta));
-      expect(polygon.get('strokeColor'), '#c0ffee');
-      expect(polygon.get('strokeOpacity'), closeTo(1, _acceptableDelta));
+      expect((polygon.get('fillColor')! as JSString).toDart, '#fabada');
+      expect(
+        (polygon.get('fillOpacity')! as JSNumber).toDartDouble,
+        closeTo(0.5, _acceptableDelta),
+      );
+      expect((polygon.get('strokeColor')! as JSString).toDart, '#c0ffee');
+      expect(
+        (polygon.get('strokeOpacity')! as JSNumber).toDartDouble,
+        closeTo(1, _acceptableDelta),
+      );
     });
 
     testWidgets('Handle Polygons with holes', (WidgetTester tester) async {
@@ -253,11 +299,12 @@ void main() {
       final gmaps.Polygon? polygon = controller.polygons.values.first.polygon;
       final gmaps.LatLng pointInHole = gmaps.LatLng(28.632, -68.401);
 
-      expect(geometry.Poly.containsLocation(pointInHole, polygon), false);
+      expect(geometry.poly.containsLocation(pointInHole, polygon!), false);
     });
 
-    testWidgets('Hole Path gets reversed to display correctly',
-        (WidgetTester tester) async {
+    testWidgets('Hole Path gets reversed to display correctly', (
+      WidgetTester tester,
+    ) async {
       final Set<Polygon> polygons = <Polygon>{
         const Polygon(
           polygonId: PolygonId('BermudaTriangle'),
@@ -279,11 +326,35 @@ void main() {
       controller.addPolygons(polygons);
 
       final gmaps.MVCArray<gmaps.MVCArray<gmaps.LatLng?>?> paths =
-          controller.polygons.values.first.polygon!.paths!;
+          controller.polygons.values.first.polygon!.paths;
 
       expect(paths.getAt(1)?.getAt(0)?.lat, 28.745);
       expect(paths.getAt(1)?.getAt(1)?.lat, 29.57);
       expect(paths.getAt(1)?.getAt(2)?.lat, 27.339);
+    });
+
+    testWidgets('addPolygons sets clickable according to consumeTapEvents', (
+      WidgetTester tester,
+    ) async {
+      final Set<Polygon> polygons = <Polygon>{
+        const Polygon(polygonId: PolygonId('1'), consumeTapEvents: true),
+        const Polygon(polygonId: PolygonId('2')),
+      };
+
+      controller.addPolygons(polygons);
+
+      final PolygonController? polygon1Controller =
+          controller.polygons[const PolygonId('1')];
+      final PolygonController? polygon2Controller =
+          controller.polygons[const PolygonId('2')];
+
+      final bool polygon1Clickable =
+          (polygon1Controller!.polygon! as JSObject).clickable;
+      final bool polygon2Clickable =
+          (polygon2Controller!.polygon! as JSObject).clickable;
+
+      expect(polygon1Clickable, true);
+      expect(polygon2Clickable, false);
     });
   });
 
@@ -355,18 +426,183 @@ void main() {
 
     testWidgets('Converts colors to CSS', (WidgetTester tester) async {
       final Set<Polyline> lines = <Polyline>{
-        const Polyline(
-          polylineId: PolylineId('1'),
-          color: Color(0x7FFABADA),
-        ),
+        const Polyline(polylineId: PolylineId('1'), color: Color(0x7FFABADA)),
       };
 
       controller.addPolylines(lines);
 
       final gmaps.Polyline line = controller.lines.values.first.line!;
 
-      expect(line.get('strokeColor'), '#fabada');
-      expect(line.get('strokeOpacity'), closeTo(0.5, _acceptableDelta));
+      expect((line.get('strokeColor')! as JSString).toDart, '#fabada');
+      expect(
+        (line.get('strokeOpacity')! as JSNumber).toDartDouble,
+        closeTo(0.5, _acceptableDelta),
+      );
+    });
+
+    testWidgets('addPolylines sets clickable according to consumeTapEvents', (
+      WidgetTester tester,
+    ) async {
+      final Set<Polyline> polylines = <Polyline>{
+        const Polyline(polylineId: PolylineId('1'), consumeTapEvents: true),
+        const Polyline(polylineId: PolylineId('2')),
+      };
+
+      controller.addPolylines(polylines);
+
+      final PolylineController? polyline1Controller =
+          controller.lines[const PolylineId('1')];
+      final PolylineController? polyline2Controller =
+          controller.lines[const PolylineId('2')];
+
+      final bool polyline1Clickable =
+          (polyline1Controller!.line! as JSObject).clickable;
+      final bool polyline2Clickable =
+          (polyline2Controller!.line! as JSObject).clickable;
+
+      expect(polyline1Clickable, true);
+      expect(polyline2Clickable, false);
+    });
+  });
+
+  group('HeatmapsController', () {
+    late HeatmapsController controller;
+
+    const List<WeightedLatLng> heatmapPoints = <WeightedLatLng>[
+      WeightedLatLng(LatLng(37.782, -122.447)),
+      WeightedLatLng(LatLng(37.782, -122.445)),
+      WeightedLatLng(LatLng(37.782, -122.443)),
+      WeightedLatLng(LatLng(37.782, -122.441)),
+      WeightedLatLng(LatLng(37.782, -122.439)),
+      WeightedLatLng(LatLng(37.782, -122.437)),
+      WeightedLatLng(LatLng(37.782, -122.435)),
+      WeightedLatLng(LatLng(37.785, -122.447)),
+      WeightedLatLng(LatLng(37.785, -122.445)),
+      WeightedLatLng(LatLng(37.785, -122.443)),
+      WeightedLatLng(LatLng(37.785, -122.441)),
+      WeightedLatLng(LatLng(37.785, -122.439)),
+      WeightedLatLng(LatLng(37.785, -122.437)),
+      WeightedLatLng(LatLng(37.785, -122.435)),
+    ];
+
+    setUp(() {
+      controller = HeatmapsController();
+      controller.bindToMap(123, map);
+    });
+
+    testWidgets('addHeatmaps', (WidgetTester tester) async {
+      final Set<Heatmap> heatmaps = <Heatmap>{
+        const Heatmap(
+          heatmapId: HeatmapId('1'),
+          data: heatmapPoints,
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+        const Heatmap(
+          heatmapId: HeatmapId('2'),
+          data: heatmapPoints,
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+      };
+
+      controller.addHeatmaps(heatmaps);
+
+      expect(controller.heatmaps.length, 2);
+      expect(controller.heatmaps, contains(const HeatmapId('1')));
+      expect(controller.heatmaps, contains(const HeatmapId('2')));
+      expect(controller.heatmaps, isNot(contains(const HeatmapId('66'))));
+    });
+
+    testWidgets('changeHeatmaps', (WidgetTester tester) async {
+      final Set<Heatmap> heatmaps = <Heatmap>{
+        const Heatmap(
+          heatmapId: HeatmapId('1'),
+          data: <WeightedLatLng>[],
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+      };
+      controller.addHeatmaps(heatmaps);
+
+      expect(
+        controller.heatmaps[const HeatmapId('1')]!.heatmap!.data.array.toDart,
+        hasLength(0),
+      );
+
+      final Set<Heatmap> updatedHeatmaps = <Heatmap>{
+        const Heatmap(
+          heatmapId: HeatmapId('1'),
+          data: <WeightedLatLng>[WeightedLatLng(LatLng(0, 0))],
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+      };
+      controller.changeHeatmaps(updatedHeatmaps);
+
+      expect(controller.heatmaps.length, 1);
+      expect(
+        controller.heatmaps[const HeatmapId('1')]!.heatmap!.data.array.toDart,
+        hasLength(1),
+      );
+    });
+
+    testWidgets('removeHeatmaps', (WidgetTester tester) async {
+      final Set<Heatmap> heatmaps = <Heatmap>{
+        const Heatmap(
+          heatmapId: HeatmapId('1'),
+          data: heatmapPoints,
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+        const Heatmap(
+          heatmapId: HeatmapId('2'),
+          data: heatmapPoints,
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+        const Heatmap(
+          heatmapId: HeatmapId('3'),
+          data: heatmapPoints,
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+      };
+
+      controller.addHeatmaps(heatmaps);
+
+      expect(controller.heatmaps.length, 3);
+
+      // Remove some polylines...
+      final Set<HeatmapId> heatmapIdsToRemove = <HeatmapId>{
+        const HeatmapId('1'),
+        const HeatmapId('3'),
+      };
+
+      controller.removeHeatmaps(heatmapIdsToRemove);
+
+      expect(controller.heatmaps.length, 1);
+      expect(controller.heatmaps, isNot(contains(const HeatmapId('1'))));
+      expect(controller.heatmaps, contains(const HeatmapId('2')));
+      expect(controller.heatmaps, isNot(contains(const HeatmapId('3'))));
+    });
+
+    testWidgets('Converts colors to CSS', (WidgetTester tester) async {
+      final Set<Heatmap> heatmaps = <Heatmap>{
+        const Heatmap(
+          heatmapId: HeatmapId('1'),
+          data: heatmapPoints,
+          gradient: HeatmapGradient(<HeatmapGradientColor>[
+            HeatmapGradientColor(Color(0xFFFABADA), 0),
+          ]),
+          radius: HeatmapRadius.fromPixels(20),
+        ),
+      };
+
+      controller.addHeatmaps(heatmaps);
+
+      final visualization.HeatmapLayer heatmap =
+          controller.heatmaps.values.first.heatmap!;
+
+      expect(
+        (heatmap.get('gradient')! as JSArray<JSString>).toDart.map(
+          (JSString? value) => value!.toDart,
+        ),
+        <String>['rgba(250, 186, 218, 0.00)', 'rgba(250, 186, 218, 1.00)'],
+      );
     });
   });
 }

@@ -3,16 +3,20 @@
 // found in the LICENSE file.
 import 'package:pigeon/pigeon.dart';
 
-@ConfigurePigeon(PigeonOptions(
-  input: 'pigeons/messages.dart',
-  javaOut:
-      'android/src/main/java/io/flutter/plugins/pathprovider/Messages.java',
-  javaOptions: JavaOptions(
-      className: 'Messages', package: 'io.flutter.plugins.pathprovider'),
-  dartOut: 'lib/messages.g.dart',
-  dartTestOut: 'test/messages_test.g.dart',
-  copyrightHeader: 'pigeons/copyright.txt',
-))
+@ConfigurePigeon(
+  PigeonOptions(
+    input: 'pigeons/messages.dart',
+    javaOut:
+        'android/src/main/java/io/flutter/plugins/pathprovider/Messages.java',
+    javaOptions: JavaOptions(
+      className: 'Messages',
+      package: 'io.flutter.plugins.pathprovider',
+    ),
+    dartOut: 'lib/messages.g.dart',
+    dartTestOut: 'test/messages_test.g.dart',
+    copyrightHeader: 'pigeons/copyright.txt',
+  ),
+)
 enum StorageDirectory {
   root,
   music,
@@ -40,7 +44,7 @@ abstract class PathProviderApi {
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   String? getExternalStoragePath();
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
-  List<String?> getExternalCachePaths();
+  List<String> getExternalCachePaths();
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
-  List<String?> getExternalStoragePaths(StorageDirectory directory);
+  List<String> getExternalStoragePaths(StorageDirectory directory);
 }

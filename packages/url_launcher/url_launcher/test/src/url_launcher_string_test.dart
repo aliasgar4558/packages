@@ -49,6 +49,7 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(await launchUrlString(urlString), isTrue);
@@ -65,6 +66,7 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(await launchUrlString(urlString), isTrue);
@@ -81,6 +83,7 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(await launchUrlString(urlString), isTrue);
@@ -97,6 +100,7 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(await launchUrlString(urlString), isTrue);
@@ -113,10 +117,13 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
-      expect(await launchUrlString(urlString, mode: LaunchMode.inAppWebView),
-          isTrue);
+      expect(
+        await launchUrlString(urlString, mode: LaunchMode.inAppWebView),
+        isTrue,
+      );
     });
 
     test('external browser', () async {
@@ -130,12 +137,57 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(
-          await launchUrlString(urlString,
-              mode: LaunchMode.externalApplication),
-          isTrue);
+        await launchUrlString(urlString, mode: LaunchMode.externalApplication),
+        isTrue,
+      );
+    });
+
+    test('in-app browser', () async {
+      const String urlString = 'https://flutter.dev';
+      mock
+        ..setLaunchExpectations(
+          url: urlString,
+          launchMode: PreferredLaunchMode.inAppBrowserView,
+          enableJavaScript: true,
+          enableDomStorage: true,
+          universalLinksOnly: false,
+          headers: <String, String>{},
+          webOnlyWindowName: null,
+          showTitle: false,
+        )
+        ..setResponse(true);
+      expect(
+        await launchUrlString(urlString, mode: LaunchMode.inAppBrowserView),
+        isTrue,
+      );
+    });
+
+    test('in-app browser with title', () async {
+      const String urlString = 'https://flutter.dev';
+      mock
+        ..setLaunchExpectations(
+          url: urlString,
+          launchMode: PreferredLaunchMode.inAppBrowserView,
+          enableJavaScript: true,
+          enableDomStorage: true,
+          universalLinksOnly: false,
+          headers: <String, String>{},
+          webOnlyWindowName: null,
+          showTitle: true,
+        )
+        ..setResponse(true);
+      expect(
+        await launchUrlString(
+          urlString,
+          mode: LaunchMode.inAppBrowserView,
+          browserConfiguration: const BrowserConfiguration(showTitle: true),
+        ),
+        isTrue,
+      );
     });
 
     test('external non-browser only', () async {
@@ -149,12 +201,16 @@ void main() {
           universalLinksOnly: true,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(
-          await launchUrlString(urlString,
-              mode: LaunchMode.externalNonBrowserApplication),
-          isTrue);
+        await launchUrlString(
+          urlString,
+          mode: LaunchMode.externalNonBrowserApplication,
+        ),
+        isTrue,
+      );
     });
 
     test('in-app webview without javascript', () async {
@@ -168,14 +224,19 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(
-          await launchUrlString(urlString,
-              mode: LaunchMode.inAppWebView,
-              webViewConfiguration:
-                  const WebViewConfiguration(enableJavaScript: false)),
-          isTrue);
+        await launchUrlString(
+          urlString,
+          mode: LaunchMode.inAppWebView,
+          webViewConfiguration: const WebViewConfiguration(
+            enableJavaScript: false,
+          ),
+        ),
+        isTrue,
+      );
     });
 
     test('in-app webview without DOM storage', () async {
@@ -189,14 +250,19 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(
-          await launchUrlString(urlString,
-              mode: LaunchMode.inAppWebView,
-              webViewConfiguration:
-                  const WebViewConfiguration(enableDomStorage: false)),
-          isTrue);
+        await launchUrlString(
+          urlString,
+          mode: LaunchMode.inAppWebView,
+          webViewConfiguration: const WebViewConfiguration(
+            enableDomStorage: false,
+          ),
+        ),
+        isTrue,
+      );
     });
 
     test('in-app webview with headers', () async {
@@ -210,21 +276,27 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{'key': 'value'},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(
-          await launchUrlString(urlString,
-              mode: LaunchMode.inAppWebView,
-              webViewConfiguration: const WebViewConfiguration(
-                  headers: <String, String>{'key': 'value'})),
-          isTrue);
+        await launchUrlString(
+          urlString,
+          mode: LaunchMode.inAppWebView,
+          webViewConfiguration: const WebViewConfiguration(
+            headers: <String, String>{'key': 'value'},
+          ),
+        ),
+        isTrue,
+      );
     });
 
     test('cannot launch a non-web URL in a webview', () async {
       expect(
-          () async => launchUrlString('tel:555-555-5555',
-              mode: LaunchMode.inAppWebView),
-          throwsA(isA<ArgumentError>()));
+        () async =>
+            launchUrlString('tel:555-555-5555', mode: LaunchMode.inAppWebView),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('non-web URL with default options', () async {
@@ -239,6 +311,7 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(await launchUrlString(emailLaunchUrlString), isTrue);
@@ -257,6 +330,7 @@ void main() {
           universalLinksOnly: false,
           headers: <String, String>{},
           webOnlyWindowName: null,
+          showTitle: false,
         )
         ..setResponse(true);
       expect(await launchUrlString(urlString), isTrue);

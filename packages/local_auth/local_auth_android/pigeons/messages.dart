@@ -4,13 +4,14 @@
 
 import 'package:pigeon/pigeon.dart';
 
-@ConfigurePigeon(PigeonOptions(
-  dartOut: 'lib/src/messages.g.dart',
-  javaOut: 'android/src/main/java/io/flutter/plugins/localauth/Messages.java',
-  javaOptions: JavaOptions(package: 'io.flutter.plugins.localauth'),
-  copyrightHeader: 'pigeons/copyright.txt',
-))
-
+@ConfigurePigeon(
+  PigeonOptions(
+    dartOut: 'lib/src/messages.g.dart',
+    javaOut: 'android/src/main/java/io/flutter/plugins/localauth/Messages.java',
+    javaOptions: JavaOptions(package: 'io.flutter.plugins.localauth'),
+    copyrightHeader: 'pigeons/copyright.txt',
+  ),
+)
 /// Pigeon version of AndroidAuthStrings, plus the authorization reason.
 ///
 /// See auth_messages_android.dart for details.
@@ -73,11 +74,12 @@ enum AuthResult {
 }
 
 class AuthOptions {
-  AuthOptions(
-      {required this.biometricOnly,
-      required this.sensitiveTransaction,
-      required this.sticky,
-      required this.useErrorDialgs});
+  AuthOptions({
+    required this.biometricOnly,
+    required this.sensitiveTransaction,
+    required this.sticky,
+    required this.useErrorDialgs,
+  });
   final bool biometricOnly;
   final bool sensitiveTransaction;
   final bool sticky;
@@ -86,13 +88,6 @@ class AuthOptions {
 
 /// Pigeon equivalent of the subset of BiometricType used by Android.
 enum AuthClassification { weak, strong }
-
-// TODO(stuartmorgan): Remove this when
-// https://github.com/flutter/flutter/issues/87307 is implemented.
-class AuthClassificationWrapper {
-  AuthClassificationWrapper({required this.value});
-  final AuthClassification value;
-}
 
 @HostApi()
 abstract class LocalAuthApi {
@@ -111,7 +106,7 @@ abstract class LocalAuthApi {
 
   /// Returns the biometric types that are enrolled, and can thus be used
   /// without additional setup.
-  List<AuthClassificationWrapper> getEnrolledBiometrics();
+  List<AuthClassification> getEnrolledBiometrics();
 
   /// Attempts to authenticate the user with the provided [options], and using
   /// [strings] for any UI.

@@ -1,3 +1,12 @@
+## NEXT
+
+* Updates minimum supported SDK version to Flutter 3.29/Dart 3.7.
+* Updates README to reflect that only Android API 24+ is supported.
+
+## 2.3.0
+
+* Adds endorsed macOS support.
+
 ## 2.2.0
 
 * Switches endorsed iOS implementation to `local_auth_darwin`.

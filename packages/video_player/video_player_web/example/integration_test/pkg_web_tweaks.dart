@@ -11,12 +11,16 @@ import 'package:web/web.dart' as web;
 /// Adds a `controlsList` and `disablePictureInPicture` getters.
 extension NonStandardGettersOnVideoElement on web.HTMLVideoElement {
   external web.DOMTokenList? get controlsList;
-  external JSBoolean get disablePictureInPicture;
+  // TODO(srujzs): This will be added in `package:web` 0.6.0. Remove this helper
+  // once it's available.
+  external bool get disablePictureInPicture;
 }
 
 /// Adds a `disableRemotePlayback` getter.
 extension NonStandardGettersOnMediaElement on web.HTMLMediaElement {
-  external JSBoolean get disableRemotePlayback;
+  // TODO(srujzs): This will be added in `package:web` 0.6.0. Remove this helper
+  // once it's available.
+  external bool get disableRemotePlayback;
 }
 
 /// Defines JS interop to access static methods from `Object`.
@@ -24,13 +28,19 @@ extension NonStandardGettersOnMediaElement on web.HTMLMediaElement {
 extension type DomObject._(JSAny _) {
   @JS('defineProperty')
   external static void _defineProperty(
-      JSAny? object, JSString property, Descriptor value);
+    JSAny? object,
+    JSString property,
+    Descriptor value,
+  );
 
   /// `Object.defineProperty`.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
   static void defineProperty(
-      JSObject object, String property, Descriptor descriptor) {
+    JSObject object,
+    String property,
+    Descriptor descriptor,
+  ) {
     return _defineProperty(object, property.toJS, descriptor);
   }
 }
@@ -40,24 +50,14 @@ extension type DomObject._(JSAny _) {
 /// See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#description
 extension type Descriptor._(JSObject _) implements JSObject {
   /// Builds a "data descriptor".
-  factory Descriptor.data({
-    bool? writable,
-    JSAny? value,
-  }) =>
-      Descriptor._data(
-        writable: writable?.toJS,
-        value: value.jsify(),
-      );
+  factory Descriptor.data({bool? writable, JSAny? value}) =>
+      Descriptor._data(writable: writable?.toJS, value: value.jsify());
 
   /// Builds an "accessor descriptor".
   factory Descriptor.accessor({
     void Function(JSAny? value)? set,
     JSAny? Function()? get,
-  }) =>
-      Descriptor._accessor(
-        set: set?.toJS,
-        get: get?.toJS,
-      );
+  }) => Descriptor._accessor(set: set?.toJS, get: get?.toJS);
 
   external factory Descriptor._accessor({
     // JSBoolean configurable,
